@@ -85,6 +85,9 @@ void loop()
 	{
 		tone(buzzerPin, 440, 200);
 	}
+
+	// Send color index over Serial
+	Serial.println(colorIndex);
 }
 
 void setColor(int redValue, int greenValue, int blueValue)

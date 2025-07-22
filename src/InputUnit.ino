@@ -25,6 +25,7 @@ byte lastBtn = 0;
 
 void setup()
 {
+	Serial.begin(9600);
 	Wire.begin(SLAVE_ADDR);	  // Join as I2C slave
 	Wire.onRequest(sendData); // Data request handler
 	pinMode(BUTTON_PIN, INPUT_PULLUP);
@@ -40,6 +41,13 @@ void loop()
 	lastLux = analogRead(LDR_PIN);
 	lastBtn = (digitalRead(BUTTON_PIN) == LOW) ? 1 : 0;
 	delay(200);
+
+	// Send data over Serial
+	Serial.print(lastTemp, 2);
+	Serial.print(',');
+	Serial.print(lastLux);
+	Serial.print(',');
+	Serial.println(lastBtn);
 }
 
 // I2C request from master: send latest sensor data
