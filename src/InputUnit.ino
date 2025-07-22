@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <Wire.h>
 #include <math.h>
 
 // === Thermistor ===
@@ -14,6 +13,11 @@ const float c3 = 2.019202697e-07;
 
 // === Button ===
 #define BUTTON_PIN 4
+
+// === State variables ===
+float lastTemp = 0.0;
+int lastLux = 0;
+byte lastBtn = 0;
 
 void setup()
 {
