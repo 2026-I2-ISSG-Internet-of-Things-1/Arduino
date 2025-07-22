@@ -15,19 +15,11 @@ const float c3 = 2.019202697e-07;
 // === Button ===
 #define BUTTON_PIN 4
 
-// === I2C slave address ===
-#define SLAVE_ADDR 0x08
-
-// Data to send on master request
-float lastTemp = 0.0;
-int lastLux = 0;
-byte lastBtn = 0;
-
 void setup()
 {
 	Serial.begin(9600);
-	Wire.begin(SLAVE_ADDR);	  // Join as I2C slave
-	Wire.onRequest(sendData); // Data request handler
+	// Indicate this board is the INPUT unit
+	Serial.println("INPUT_READY");
 	pinMode(BUTTON_PIN, INPUT_PULLUP);
 }
 
@@ -48,12 +40,4 @@ void loop()
 	Serial.print(lastLux);
 	Serial.print(',');
 	Serial.println(lastBtn);
-}
-
-// I2C request from master: send latest sensor data
-void sendData()
-{
-	char buf[32];
-	int len = snprintf(buf, sizeof(buf), "%.2f,%d,%d", lastTemp, lastLux, lastBtn);
-	Wire.write((uint8_t *)buf, len);
 }

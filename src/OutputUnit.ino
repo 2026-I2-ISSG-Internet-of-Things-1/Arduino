@@ -1,14 +1,12 @@
-#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
 
-// === I2C slave address ===
-#define SLAVE_ADDR 0x09
+// === USB-Serial slave for display unit ===
 
 // === LCD I2C ===
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
-// === LED RGB (Cathode commune) ===
+// === LED RGB ===
 int redPin = 11;
 int greenPin = 10;
 int bluePin = 9;
@@ -27,18 +25,16 @@ int colorIndex = 0;
 unsigned long lastColorChange = 0;
 const unsigned long ledInterval = 1000;
 
-// === Received data ===
+// === Received sensor data ===
 float lastTemp = 0.0;
 int lastLux = 0;
 int lastBtn = 0;
 
-// No peer-to-peer receive; master will request status
+// Listen on Serial for sensor CSV: temp,lux,btn
 
 void setup()
 {
 	Serial.begin(9600);
-	Wire.begin(SLAVE_ADDR);		// Join as I2C slave
-	Wire.onRequest(sendStatus); // Send status on master request
 
 	lcd.init();
 	lcd.backlight();
@@ -56,7 +52,23 @@ void setup()
 
 void loop()
 {
-	// Display
+	// Read sensor data from Pi over Serial
+	if (Serial.available())
+	{
+		String line = Serial.readStringUntil('\n');
+		float t;
+		int l;
+		int b;
+		int n = sscanf(line.c_str(), "%f,%d,%d", &t, &l, &b);
+		if (n == 3)
+		{
+			lastTemp = t;
+			lastLux = l;
+			lastBtn = b;
+		}
+	}
+
+	// Display on LCD
 	lcd.clear();
 	lcd.setCursor(0, 0);
 	lcd.print("Temp = ");
@@ -86,8 +98,7 @@ void loop()
 		tone(buzzerPin, 440, 200);
 	}
 
-	// Send color index over Serial
-	Serial.println(colorIndex);
+	delay(200);
 }
 
 void setColor(int redValue, int greenValue, int blueValue)
@@ -95,9 +106,4 @@ void setColor(int redValue, int greenValue, int blueValue)
 	analogWrite(redPin, redValue);
 	analogWrite(greenPin, greenValue);
 	analogWrite(bluePin, blueValue);
-}
-// I2C request handler: send current color index
-void sendStatus()
-{
-	Wire.write((uint8_t)colorIndex);
 }
