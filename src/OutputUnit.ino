@@ -2,8 +2,8 @@
 #include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
 
-// === I2C ===
-#define SLAVE_ADDR 0x08
+// === I2C slave address ===
+#define SLAVE_ADDR 0x09
 
 // === LCD I2C ===
 LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -32,23 +32,13 @@ float lastTemp = 0.0;
 int lastLux = 0;
 int lastBtn = 0;
 
-void receiveEvent(int howMany)
-{
-	char buf[32];
-	int i = 0;
-	while (Wire.available() && i < 31)
-	{
-		buf[i++] = Wire.read();
-	}
-	buf[i] = '\0';
-	sscanf(buf, "%f,%d,%d", &lastTemp, &lastLux, &lastBtn);
-}
+// No peer-to-peer receive; master will request status
 
 void setup()
 {
 	Serial.begin(9600);
-	Wire.begin(SLAVE_ADDR);
-	Wire.onReceive(receiveEvent);
+	Wire.begin(SLAVE_ADDR);		// Join as I2C slave
+	Wire.onRequest(sendStatus); // Send status on master request
 
 	lcd.init();
 	lcd.backlight();
@@ -102,4 +92,9 @@ void setColor(int redValue, int greenValue, int blueValue)
 	analogWrite(redPin, redValue);
 	analogWrite(greenPin, greenValue);
 	analogWrite(bluePin, blueValue);
+}
+// I2C request handler: send current color index
+void sendStatus()
+{
+	Wire.write((uint8_t)colorIndex);
 }
