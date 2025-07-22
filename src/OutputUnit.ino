@@ -2,7 +2,7 @@
 #include <LiquidCrystal_I2C.h>
 
 // === LCD I2C ===
-LiquidCrystal_I2C lcd(0x27, 20, 4); // 20 colonnes, 4 lignes
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 // === LED RGB ===
 int redPin = 11;
@@ -33,6 +33,7 @@ void setup()
 	pinMode(bluePin, OUTPUT);
 	pinMode(buzzerPin, OUTPUT);
 
+	// Petit bip de démarrage
 	tone(buzzerPin, NOTE_C4, 500);
 	delay(500);
 	noTone(buzzerPin);
@@ -60,16 +61,15 @@ void loop()
 		}
 		else if (cmd.startsWith("LCD "))
 		{
-			String message = cmd.substring(4); // Retire "LCD "
+			String message = cmd.substring(4);
 
-			// Limite à 32 caractères pour tenir sur 2 lignes (20x4 LCD utilisé en 20x4)
+			// Limite à 32 caractères (2 lignes max pour 20x4)
 			message = message.substring(0, 32);
 
 			lcd.clear();
 			lcd.setCursor(0, 0);
 			lcd.print(message);
 
-			// Si message > 20 caractères, passe à la ligne 2
 			if (message.length() > 20)
 			{
 				lcd.setCursor(0, 1);
