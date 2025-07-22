@@ -108,7 +108,7 @@ void loop()
 		else if (cmd == "GET BUTTON")
 		{
 			byte buttonState = digitalRead(BUTTON_PIN);
-			if (buttonState == LOW)
+			if (buttonState == HIGH)
 			{
 				Serial.println("Button: PRESSED");
 			}
