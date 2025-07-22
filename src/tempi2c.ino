@@ -28,8 +28,6 @@ int colors[numColors][3] = {
   {255, 255, 0},  // Jaune
   {0, 255, 255},  // Cyan
   {255, 0, 255},  // Magenta
-  {255, 165, 0},  // Orange
-  {128, 0, 128}   // Violet
 };
 
 int colorIndex = 0;
