@@ -1,10 +1,8 @@
+#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include <Arduino.h>
-
-// === USB-Serial slave for display unit ===
 
 // === LCD I2C ===
-LiquidCrystal_I2C lcd(0x27, 20, 4);
+LiquidCrystal_I2C lcd(0x27, 20, 4); // 20 colonnes, 4 lignes
 
 // === LED RGB ===
 int redPin = 11;
@@ -13,7 +11,7 @@ int bluePin = 9;
 
 // === Buzzer ===
 int buzzerPin = 8;
-#define NOTE_C4 262 // Do4
+#define NOTE_C4 262
 
 // === Couleurs RGB ===
 const int colors[3][3] = {
@@ -22,15 +20,6 @@ const int colors[3][3] = {
 	{0, 0, 255}	 // Bleu
 };
 int colorIndex = 0;
-unsigned long lastColorChange = 0;
-const unsigned long ledInterval = 1000;
-
-// === Received sensor data ===
-float lastTemp = 0.0;
-int lastLux = 0;
-int lastBtn = 0;
-
-// Listen on Serial for sensor CSV: temp,lux,btn
 
 void setup()
 {
@@ -44,7 +33,6 @@ void setup()
 	pinMode(bluePin, OUTPUT);
 	pinMode(buzzerPin, OUTPUT);
 
-	// Buzzer initial: Do4 pendant 500ms
 	tone(buzzerPin, NOTE_C4, 500);
 	delay(500);
 	noTone(buzzerPin);
@@ -52,53 +40,51 @@ void setup()
 
 void loop()
 {
-	// Read sensor data from Pi over Serial
 	if (Serial.available())
 	{
-		String line = Serial.readStringUntil('\n');
-		float t;
-		int l;
-		int b;
-		int n = sscanf(line.c_str(), "%f,%d,%d", &t, &l, &b);
-		if (n == 3)
+		String cmd = Serial.readStringUntil('\n');
+		cmd.trim();
+
+		if (cmd == "CMD BUZZ")
 		{
-			lastTemp = t;
-			lastLux = l;
-			lastBtn = b;
+			tone(buzzerPin, NOTE_C4, 500);
+			delay(500);
+			noTone(buzzerPin);
+			Serial.println("OK BUZZ");
+		}
+		else if (cmd == "CMD RGB NEXT")
+		{
+			setColor(colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]);
+			colorIndex = (colorIndex + 1) % 3;
+			Serial.println("OK RGB");
+		}
+		else if (cmd.startsWith("LCD "))
+		{
+			String message = cmd.substring(4); // Retire "LCD "
+
+			// Limite à 32 caractères pour tenir sur 2 lignes (20x4 LCD utilisé en 20x4)
+			message = message.substring(0, 32);
+
+			lcd.clear();
+			lcd.setCursor(0, 0);
+			lcd.print(message);
+
+			// Si message > 20 caractères, passe à la ligne 2
+			if (message.length() > 20)
+			{
+				lcd.setCursor(0, 1);
+				lcd.print(message.substring(20));
+			}
+
+			Serial.println("OK LCD");
+		}
+		else
+		{
+			Serial.println("ERROR:UNKNOWN_CMD");
 		}
 	}
 
-	// Display on LCD
-	lcd.clear();
-	lcd.setCursor(0, 0);
-	lcd.print("Temp = ");
-	lcd.print(lastTemp, 2);
-	lcd.print(" C");
-
-	lcd.setCursor(0, 1);
-	lcd.print("Button: ");
-	lcd.print(lastBtn == 1 ? "PRESSED" : "Released");
-
-	lcd.setCursor(0, 2);
-	lcd.print("Lux = ");
-	lcd.print(lastLux);
-
-	// LED RGB cycling (non-blocking)
-	unsigned long currentMillis = millis();
-	if (currentMillis - lastColorChange >= ledInterval)
-	{
-		setColor(colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]);
-		colorIndex = (colorIndex + 1) % 3;
-		lastColorChange = currentMillis;
-	}
-
-	// Buzzer on button press
-	if (lastBtn == 1)
-	{
-		tone(buzzerPin, 440, 200);
-	}
-
-	delay(200);
+	delay(50);
 }
 
 void setColor(int redValue, int greenValue, int blueValue)
