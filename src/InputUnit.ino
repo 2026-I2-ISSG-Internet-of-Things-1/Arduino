@@ -50,7 +50,7 @@ void setup()
 	pinMode(bluePin, OUTPUT);
 	pinMode(buzzerPin, OUTPUT);
 
-	pinMode(BUTTON_PIN, INPUT_PULLUP);
+	pinMode(BUTTON_PIN, INPUT);
 
 	tone(buzzerPin, NOTE_C4, 500);
 	delay(500);
