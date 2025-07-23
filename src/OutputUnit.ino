@@ -70,12 +70,6 @@ void loop()
 			lcd.setCursor(0, 0);
 			lcd.print(message);
 
-			if (message.length() > 20)
-			{
-				lcd.setCursor(0, 1);
-				lcd.print(message.substring(20));
-			}
-
 			Serial.println("OK LCD");
 		}
 		else
