@@ -107,6 +107,46 @@ void loop()
 			lcd.setCursor(0, 0);
 			lcd.print(message);
 		}
+		else if (cmd.startsWith("LCD_DUAL "))
+		{
+			Serial.println("ACK LCD_DUAL");
+
+			String content = cmd.substring(9); // Enlever "LCD_DUAL "
+			int separatorIndex = content.indexOf('|');
+
+			if (separatorIndex != -1)
+			{
+				// Séparer les deux lignes
+				String line1 = content.substring(0, separatorIndex);
+				String line2 = content.substring(separatorIndex + 1);
+
+				// Limiter chaque ligne à 16 caractères
+				line1 = line1.substring(0, 16);
+				line2 = line2.substring(0, 16);
+
+				// Afficher sur les deux lignes
+				lcd.clear();
+				lcd.setCursor(0, 0); // Ligne 1
+				lcd.print(line1);
+				lcd.setCursor(0, 1); // Ligne 2
+				lcd.print(line2);
+
+				Serial.print("LCD_DUAL: '");
+				Serial.print(line1);
+				Serial.print("' + '");
+				Serial.print(line2);
+				Serial.println("'");
+			}
+			else
+			{
+				// Si pas de séparateur, traiter comme un message normal
+				String message = content.substring(0, 16);
+				lcd.clear();
+				lcd.setCursor(0, 0);
+				lcd.print(message);
+				Serial.println("LCD_DUAL: Single line fallback");
+			}
+		}
 		else
 		{
 			Serial.println("ERROR:UNKNOWN_CMD");
