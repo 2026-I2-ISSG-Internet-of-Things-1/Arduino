@@ -2,7 +2,7 @@
 #include <LiquidCrystal_I2C.h>
 
 // === LCD I2C ===
-LiquidCrystal_I2C lcd(0x27, 20, 4);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // === LED RGB ===
 int redPin = 11;
