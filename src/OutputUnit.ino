@@ -17,7 +17,7 @@ int buzzerPin = 8;
 const int colors[3][3] = {
 	{255, 0, 0}, // Rouge
 	{0, 255, 0}, // Vert
-	{0, 0, 255}	 // Bleu
+	{0, 0, 255}  // Bleu
 };
 int colorIndex = 0;
 
@@ -48,19 +48,23 @@ void loop()
 
 		if (cmd == "CMD BUZZ")
 		{
+			Serial.println("ACK BUZZ");
+			
 			tone(buzzerPin, NOTE_C4, 500);
 			delay(500);
 			noTone(buzzerPin);
-			Serial.println("OK BUZZ");
 		}
 		else if (cmd == "CMD RGB NEXT")
 		{
+			Serial.println("ACK RGB");
+			
 			setColor(colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]);
 			colorIndex = (colorIndex + 1) % 3;
-			Serial.println("OK RGB");
 		}
 		else if (cmd.startsWith("LCD "))
 		{
+			Serial.println("ACK LCD");
+			
 			String message = cmd.substring(4);
 
 			// Limite à 32 caractères (2 lignes max pour 20x4)
@@ -69,8 +73,6 @@ void loop()
 			lcd.clear();
 			lcd.setCursor(0, 0);
 			lcd.print(message);
-
-			Serial.println("OK LCD");
 		}
 		else
 		{
