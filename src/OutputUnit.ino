@@ -17,7 +17,7 @@ int buzzerPin = 8;
 const int colors[3][3] = {
 	{255, 0, 0}, // Rouge
 	{0, 255, 0}, // Vert
-	{0, 0, 255}  // Bleu
+	{0, 0, 255}	 // Bleu
 };
 int colorIndex = 0;
 
@@ -49,7 +49,7 @@ void loop()
 		if (cmd == "CMD BUZZ")
 		{
 			Serial.println("ACK BUZZ");
-			
+
 			tone(buzzerPin, NOTE_C4, 500);
 			delay(500);
 			noTone(buzzerPin);
@@ -57,14 +57,47 @@ void loop()
 		else if (cmd == "CMD RGB NEXT")
 		{
 			Serial.println("ACK RGB");
-			
+
 			setColor(colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]);
 			colorIndex = (colorIndex + 1) % 3;
+		}
+		else if (cmd.startsWith("SET_COLOR:"))
+		{
+			Serial.println("ACK SET_COLOR");
+
+			// Parser la commande SET_COLOR:R,G,B
+			String colorData = cmd.substring(10); // Enlever "SET_COLOR:"
+			int firstComma = colorData.indexOf(',');
+			int secondComma = colorData.indexOf(',', firstComma + 1);
+
+			if (firstComma != -1 && secondComma != -1)
+			{
+				int r = colorData.substring(0, firstComma).toInt();
+				int g = colorData.substring(firstComma + 1, secondComma).toInt();
+				int b = colorData.substring(secondComma + 1).toInt();
+
+				// Limiter les valeurs entre 0 et 255
+				r = constrain(r, 0, 255);
+				g = constrain(g, 0, 255);
+				b = constrain(b, 0, 255);
+
+				setColor(r, g, b);
+				Serial.print("RGB SET: ");
+				Serial.print(r);
+				Serial.print(",");
+				Serial.print(g);
+				Serial.print(",");
+				Serial.println(b);
+			}
+			else
+			{
+				Serial.println("ERROR:INVALID_COLOR_FORMAT");
+			}
 		}
 		else if (cmd.startsWith("LCD "))
 		{
 			Serial.println("ACK LCD");
-			
+
 			String message = cmd.substring(4);
 
 			// Limite à 32 caractères (2 lignes max pour 20x4)
