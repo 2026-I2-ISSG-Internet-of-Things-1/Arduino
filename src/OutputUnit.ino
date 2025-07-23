@@ -2,12 +2,7 @@
 #include <LiquidCrystal_I2C.h>
 
 // === LCD I2C ===
-LiquidCrystal_I2void setColor(int redValue, int greenValue, int blueValue)
-{
-	analogWrite(redPin, redValue);
-	analogWrite(greenPin, greenValue);
-	analogWrite(bluePin, blueValue);
-}x27, 20, 4);
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 // === LED RGB ===
 int redPin = 11;
@@ -72,7 +67,6 @@ void loop()
 			message = message.substring(0, 32);
 
 			lcd.clear();
-			delay(100); // Délai après effacement
 			lcd.setCursor(0, 0);
 			lcd.print(message);
 
@@ -82,7 +76,6 @@ void loop()
 				lcd.print(message.substring(20));
 			}
 
-			delay(50); // Délai pour stabiliser l'affichage
 			Serial.println("OK LCD");
 		}
 		else
